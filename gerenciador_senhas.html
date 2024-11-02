@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Senhas</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #passwordManager {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciador de Senhas</h1>
+        <div id="login">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Usuário">
+            <input type="password" id="password" placeholder="Senha">
+            <button onclick="login()">Entrar</button>
+            <button onclick="createAccount()">Criar Conta</button>
+        </div>
+
+        <div id="passwordManager">
+            <h2>Armazenar Senha</h2>
+            <input type="text" id="site" placeholder="Nome do Site">
+            <input type="password" id="sitePassword" placeholder="Senha do Site">
+            <button onclick="savePassword()">Salvar Senha</button>
+        </div>
+    </div>
+
+    <script>
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const userData = JSON.parse(localStorage.getItem(username));
+            if (userData) {
+                const decryptedPassword = CryptoJS.AES.decrypt(userData.password, 'secret key 123').toString(CryptoJS.enc.Utf8);
+                if (decryptedPassword === password) {
+                    alert('Login bem-sucedido!');
+                    document.getElementById('login').style.display = 'none';
+                    document.getElementById('passwordManager').style.display = 'block';
+                } else {
+                    alert('Senha incorreta.');
+                }
+            } else {
+                alert('Usuário não encontrado.');
+            }
+        }
+
+        function createAccount() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const encryptedPassword = CryptoJS.AES.encrypt(password, 'secret key 123').toString();
+            localStorage.setItem(username, JSON.stringify({ password: encryptedPassword, passwords: {} }));
+            alert('Conta criada com sucesso!');
+        }
+
+        function savePassword() {
+            const username = document.getElementById('username').value;
+            const site = document.getElementById('site').value;
+            const sitePassword = document.getElementById('sitePassword').value;
+
+            const userData = JSON.parse(localStorage.getItem(username));
+            if (userData) {
+                userData.passwords[site] = CryptoJS.AES.encrypt(sitePassword, 'secret key 123').toString();
+                localStorage.setItem(username, JSON.stringify(userData));
+                alert('Senha armazenada com sucesso!');
+            }
+        }
+    </script>
+</body>
+</html>
